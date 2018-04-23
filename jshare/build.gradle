@@ -1,0 +1,68 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.0'
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            //选择要添加的对应 cpu 类型的.so 库。
+            abiFilters "x86"
+            abiFilters "armeabi"
+            abiFilters "armeabi-v7a"
+            //abiFilters 'armeabi', 'armeabi-v7a', 'armeabi-v8a'
+            // 还可以添加 'x86', 'x86_64', 'mips', 'mips64'
+        }
+
+        manifestPlaceholders = [
+                JSHARE_PKGNAME : "applicationId",
+                JPUSH_APPKEY : "你的 appkey", //极光控制台创建应用得到的 AppKey.
+                JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
+                TENCENT_APPID: " QQ 开发者应用的 appID ",//腾讯开放平台注册应用得到的 appId
+                FACEBOOK_APPID: " facebook 开发者应用的 appID "// facebook 注册应用得到的 appId
+        ]
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile "com.android.support:support-v4:26.0.0"
+    compile "com.android.support:appcompat-v7:26.0.0"
+    testCompile 'junit:junit:4.12'
+    androidTestCompile('com.android.support.test.espresso:espresso-core:3.0.1', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.github.BigXiangxy:QYQBase:1.0'
+//    provided 'org.weex.plugin:processor:1.0.2'
+//    if (project.usingWeex == "0.18.0") {
+//        compile project(':weex_sdk')
+//    } else if (project.usingWeex == "0.16.0") {
+//        compile project(':weex_sdk_16')
+//    }
+//    compile 'cn.jiguang.sdk:jpush:3.1.1'  // 此处以JPush 3.1.1 版本为例。
+//    compile 'cn.jiguang.sdk:jshare:1.5.0'  // 此处以 JShare 1.5.0 版本为例，具体版本请参考压缩包 libs 的 jar 包版本。
+//    compile 'cn.jiguang.sdk:jshare-qqmodel:1.5.0'  // 此处以 jshare-qqmodel 1.5.0  版本为例，具体版本请参考压缩包 libs 的 jar 包版本。
+//    compile 'cn.jiguang.sdk:jshare-wechatmodel:1.5.0'  // 此处以 jshare-wechatmodel 1.5.0  版本为例，具体版本请参考压缩包 libs 的 jar 包版本。
+//    compile 'cn.jiguang.sdk:jshare-sinamodel:1.5.0'  // 此处以 jshare-sinamodel 1.5.0  版本为例，具体版本请参考压缩包 libs 的 jar 包版本。
+//    compile 'cn.jiguang.sdk:jshare-facebookmodel:1.5.0'  // 此处以 jshare-facebookmodel 1.5.0  版本为例，具体版本请参考压缩包 libs 的 jar 包版本。
+//    compile 'cn.jiguang.sdk:jshare-twittermodel:1.5.0'  // 此处以 jshare-twittermodel 1.5.0  版本为例，具体版本请参考压缩包 libs 的 jar 包版本。
+//    compile 'cn.jiguang.sdk:jcore:1.1.7'  // 此处以 JCore 1.1.7 版本为例，具体版本请参考压缩包 libs 的 jar 包版本。
+}
