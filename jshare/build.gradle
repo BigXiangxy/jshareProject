@@ -18,14 +18,6 @@ android {
             //abiFilters 'armeabi', 'armeabi-v7a', 'armeabi-v8a'
             // 还可以添加 'x86', 'x86_64', 'mips', 'mips64'
         }
-
-        manifestPlaceholders = [
-                JSHARE_PKGNAME : "applicationId",
-                JPUSH_APPKEY : "你的 appkey", //极光控制台创建应用得到的 AppKey.
-                JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
-                TENCENT_APPID: " QQ 开发者应用的 appID ",//腾讯开放平台注册应用得到的 appId
-                FACEBOOK_APPID: " facebook 开发者应用的 appID "// facebook 注册应用得到的 appId
-        ]
     }
     sourceSets {
         main {
@@ -33,6 +25,15 @@ android {
         }
     }
     buildTypes {
+//        debug {
+//            manifestPlaceholders = [
+//                    JSHARE_PKGNAME: "applicationId",
+//                    JPUSH_APPKEY  : "你的 appkey", //极光控制台创建应用得到的 AppKey.
+//                    JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
+//                    TENCENT_APPID : " QQ 开发者应用的 appID ",//腾讯开放平台注册应用得到的 appId
+//                    FACEBOOK_APPID: " facebook 开发者应用的 appID "// facebook 注册应用得到的 appId
+//            ]
+//        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
