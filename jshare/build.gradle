@@ -18,6 +18,10 @@ android {
             //abiFilters 'armeabi', 'armeabi-v7a', 'armeabi-v8a'
             // 还可以添加 'x86', 'x86_64', 'mips', 'mips64'
         }
+
+        javaCompileOptions {
+            annotationProcessorOptions.includeCompileClasspath = true
+        }
     }
     sourceSets {
         main {
@@ -50,8 +54,8 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:3.0.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.github.BigXiangxy:QYQBase:1.1'
-//    provided 'org.weex.plugin:processor:1.0.2'
+    compile 'com.github.BigXiangxy:QYQBase:1.5'
+    provided 'org.weex.plugin:processor:1.0.2'
 //    if (project.usingWeex == "0.18.0") {
 //        compile project(':weex_sdk')
 //    } else if (project.usingWeex == "0.16.0") {
