@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.base.library.UserBean;
 import com.google.gson.Gson;
 import com.taobao.weex.WXSDKInstance;
+import com.taobao.weex.annotation.JSMethod;
 import com.taobao.weex.bridge.JSCallback;
 import com.taobao.weex.common.WXModule;
 import com.xxy.jshare.wxapi.BaseCallBackBean;
@@ -85,13 +86,13 @@ public class JShareModule extends WXModule {
      * <p>
      * flag 参数选择:
      * public static final int TEXT_FLAG = 1;//文字分享标志
-     * public static final int IMG_LOC_FLAG = 1 << 1;//本地图片分享标志
-     * public static final int IMG_URL_FLAG = 1 << 2;// 图片url分享标志
-     * public static final int WEBPAGE_FLAG = 1 << 3;//网页链接分享标志
-     * public static final int MUSIC_FLAG = 1 << 4;//音乐分享标志
-     * public static final int VIDEO_FLAG = 1 << 5;//视频分享标志
-     * public static final int EMOJI_FLAG = 1 << 6;//emoji表情分享标志
-     * public static final int FILE_FLAG = 1 << 7;//文件分享标志
+     * public static final int IMG_LOC_FLAG =2;//本地图片分享标志
+     * public static final int IMG_URL_FLAG = 4;// 图片url分享标志
+     * public static final int WEBPAGE_FLAG = 8;//网页链接分享标志
+     * public static final int MUSIC_FLAG = 16;//音乐分享标志
+     * public static final int VIDEO_FLAG = 32;//视频分享标志
+     * public static final int EMOJI_FLAG = 64;//emoji表情分享标志
+     * public static final int FILE_FLAG = 128;//文件分享标志
      * <p>
      * json参数简要说明():
      * public String title;//标题
@@ -110,7 +111,7 @@ public class JShareModule extends WXModule {
      *                   所有参数如:{"filePath":"filePath","imagePath":["/sdcard/123.png","/sdcard/1.png"],"imageUrl":["http://SDFD/SDFSD.PNG","https://5646/455.PNG"],"musicUrl":"/sdcard/123.mp3","shareUrl":"http://6456546/15","text":"文字内容","title":"标题","url":"http://www.baidu.com","videoPath":"/sdcard/45.mp4","videoUrl":"http://sdfsdf.mp4"}
      * @param jsCallback
      */
-//    @JSMethod(uiThread = true)
+    @JSMethod(uiThread = true)
     public void share(final int flag, String shareJson, JSCallback jsCallback) {
         BaseCallBackBean<UserBean> beanBaseCallBackBean = new BaseCallBackBean<>();
         ShareJSONBean shareJSONBean = null;

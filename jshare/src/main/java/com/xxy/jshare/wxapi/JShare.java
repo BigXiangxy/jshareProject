@@ -42,13 +42,34 @@ public class JShare {
     private static final String TAG = "JShare";
     private ShareBoard mShareBoard;
 
-    public static void init(Context context) {
+    /**
+     * .setWechat("wxc40e16f3ba6ebabc", "dcad950cd0633a27e353477c4ec12e7a")
+     * .setQQ("1106011004", "YIbPvONmBQBZUGaN")
+     * .setSinaWeibo("374535501", "baccd12c166f1df96736b51ffbf600a2", "https://www.jiguang.cn");
+     *
+     * @param context
+     * @param weChatAppId
+     * @param weChatSecret
+     * @param QQAppId
+     * @param QQAppKey
+     * @param sinaAppKey
+     * @param sinaAppSecret
+     * @param sinaRedirectUrl
+     */
+    public static void init(Context context,
+                            String weChatAppId,
+                            String weChatSecret,
+                            String QQAppId,
+                            String QQAppKey,
+                            String sinaAppKey,
+                            String sinaAppSecret,
+                            String sinaRedirectUrl) {
         PlatformConfig platformConfig = new PlatformConfig()
-                .setWechat("wxc40e16f3ba6ebabc", "dcad950cd0633a27e353477c4ec12e7a")
-                .setQQ("1106011004", "YIbPvONmBQBZUGaN")
-                .setSinaWeibo("374535501", "baccd12c166f1df96736b51ffbf600a2", "https://www.jiguang.cn")
-                .setFacebook("1847959632183996", "JShareDemo")
-                .setTwitter("eRJyErWUhRZVqBzADAbUnNWx5", "Oo7DJMiBwBHGFWglFrML1ULZCUDlH990RlJlQDdfepm3lToiMC");
+                .setWechat(weChatAppId, weChatSecret)
+                .setQQ(QQAppId, QQAppKey)
+                .setSinaWeibo(sinaAppKey, sinaAppSecret, sinaRedirectUrl);
+//                .setFacebook("1847959632183996", "JShareDemo")
+//                .setTwitter("eRJyErWUhRZVqBzADAbUnNWx5", "Oo7DJMiBwBHGFWglFrML1ULZCUDlH990RlJlQDdfepm3lToiMC");
         /**
          * since 1.5.0，1.5.0版本后增加API，支持在代码中设置第三方appKey等信息，当PlatformConfig为null时，或者使用JShareInterface.init(Context)时需要配置assets目录下的JGShareSDK.xml
          **/
