@@ -95,10 +95,10 @@
         </activity>
 
         <!-- Optional 微信分享回调,wxapi必须在包名路径下，否则回调不成功-->
-        <activity
-            android:name=".wxapi.WXEntryActivity"
-            android:exported="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <!--<activity-->
+            <!--android:name=".wxapi.WXEntryActivity"-->
+            <!--android:exported="true"-->
+            <!--android:theme="@android:style/Theme.Translucent.NoTitleBar" />-->
 
         <!-- Optional facebook配置,authorities必须为com.facebook.app.FacebookContentProvider+APP_ID 这里不集成FaceBook所以注释-->
         <!--<provider-->
