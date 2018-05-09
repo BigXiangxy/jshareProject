@@ -7,9 +7,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
-import com.base.library.UserBean;
 import com.google.gson.Gson;
-import com.taobao.weex.WXSDKInstance;
 import com.taobao.weex.annotation.JSMethod;
 import com.taobao.weex.bridge.JSCallback;
 import com.taobao.weex.common.WXModule;
@@ -77,10 +75,6 @@ public class JShareModule extends WXModule {
 
     private JSCallback shareJSCallback;
 
-    public void setModule(WXSDKInstance instance) {
-        mWXSDKInstance = instance;
-    }
-
     /**
      * 发起分享
      * <p>
@@ -113,7 +107,7 @@ public class JShareModule extends WXModule {
      */
     @JSMethod(uiThread = true)
     public void share(final int flag, String shareJson, JSCallback jsCallback) {
-        BaseCallBackBean<UserBean> beanBaseCallBackBean = new BaseCallBackBean<>();
+        BaseCallBackBean<String> beanBaseCallBackBean = new BaseCallBackBean<>();
         ShareJSONBean shareJSONBean = null;
         try {
             shareJSONBean = new Gson().fromJson(shareJson, ShareJSONBean.class);
@@ -144,6 +138,7 @@ public class JShareModule extends WXModule {
             jsCallback.invoke(beanBaseCallBackBean.setCode(-200).setMessage("UserModule ::: getInstall - Activity is null!!!"));
             return;
         }
+        shareJSCallback = jsCallback;
         progressDialog = new ProgressDialog(activity);
         progressDialog.setTitle("请稍候");
 
@@ -392,9 +387,23 @@ public class JShareModule extends WXModule {
         public void handleMessage(Message msg) {
             try {
                 String toastMsg = (String) msg.obj;
-                Toast.makeText(progressDialog.getContext(), toastMsg, Toast.LENGTH_SHORT).show();
                 if (progressDialog != null && progressDialog.isShowing()) {
+                    Toast.makeText(mWXSDKInstance.getContext(), toastMsg, Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
+                }
+                if (shareJSCallback != null) {
+                    BaseCallBackBean<String> beanBaseCallBackBean = new BaseCallBackBean<>();
+                    switch (msg.what) {
+                        case 1://成功
+                            shareJSCallback.invokeAndKeepAlive(beanBaseCallBackBean.setData(toastMsg));
+                            break;
+                        case 3://取消
+                            shareJSCallback.invokeAndKeepAlive(beanBaseCallBackBean.setData(toastMsg));
+                            break;
+                        default://失败
+                            shareJSCallback.invokeAndKeepAlive(beanBaseCallBackBean.setCode(msg.what).setMessage(toastMsg));
+                            break;
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -407,6 +416,7 @@ public class JShareModule extends WXModule {
         public void onComplete(Platform platform, int action, HashMap<String, Object> data) {
             if (handler != null) {
                 Message message = handler.obtainMessage();
+                message.what = 1;
                 message.obj = "分享成功";
                 handler.sendMessage(message);
             }
@@ -417,6 +427,7 @@ public class JShareModule extends WXModule {
             Logger.e(TAG, "error:" + errorCode + ",msg:" + error);
             if (handler != null) {
                 Message message = handler.obtainMessage();
+                message.what = errorCode;
                 message.obj = "分享失败:[" + errorCode + "] " + error.getMessage();
                 handler.sendMessage(message);
             }
@@ -426,6 +437,7 @@ public class JShareModule extends WXModule {
         public void onCancel(Platform platform, int action) {
             if (handler != null) {
                 Message message = handler.obtainMessage();
+                message.what = 3;
                 message.obj = "分享取消";
                 handler.sendMessage(message);
             }

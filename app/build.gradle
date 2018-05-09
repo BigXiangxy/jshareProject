@@ -28,6 +28,13 @@ android {
                 TENCENT_APPID : " QQ 开发者应用的 appID ",//腾讯开放平台注册应用得到的 appId
                 FACEBOOK_APPID: " facebook 开发者应用的 appID "// facebook 注册应用得到的 appId
         ]
+        buildConfigField("String", "weChatAppId", "\"wx3dff908e443681f0\"")//微信的appid
+        buildConfigField("String", "weChatSecret", "\"AQ1sw2de3fr4gt5hy6ju7ki8lo9zxcvb\"")//微信的secret
+        buildConfigField("String", "QQAppId", "\"QQ的AppId\"")//QQ的AppId
+        buildConfigField("String", "QQAppKey", "\"QQ的AppKey\"")//QQ的AppKey
+        buildConfigField("String", "sinaAppKey", "\"新浪微博的AppKey\"")//新浪微博的AppKey
+        buildConfigField("String", "sinaAppSecret", "\"新浪微博ppSecret\"")//新浪微博ppSecret
+        buildConfigField("String", "sinaRedirectUrl", "\"微博开放平台填写的授权回调页\"")//微博开放平台填写的授权回调页
     }
 
     productFlavors.all { flavor ->
