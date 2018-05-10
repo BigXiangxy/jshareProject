@@ -7,11 +7,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.alibaba.weex.plugin.annotation.WeexModule;
 import com.google.gson.Gson;
 import com.taobao.weex.annotation.JSMethod;
 import com.taobao.weex.bridge.JSCallback;
 import com.taobao.weex.common.WXModule;
 import com.xxy.jshare.wxapi.BaseCallBackBean;
+import com.xxy.jshare.wxapi.JPushCallBackManager;
 import com.xxy.jshare.wxapi.JShare;
 import com.xxy.jshare.wxapi.Logger;
 import com.xxy.jshare.wxapi.ShareBoard;
@@ -21,6 +23,7 @@ import com.xxy.jshare.wxapi.SnsPlatform;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import cn.jiguang.share.android.api.JShareInterface;
 import cn.jiguang.share.android.api.PlatActionListener;
@@ -28,11 +31,14 @@ import cn.jiguang.share.android.api.Platform;
 import cn.jiguang.share.android.api.ShareParams;
 import cn.jiguang.share.qqmodel.QZone;
 import cn.jiguang.share.weibo.SinaWeibo;
+import cn.jpush.android.api.JPushInterface;
 
 /**
+ * 所有带sequence参数的接口 都必须携带此参数且不可重复，否则有可能收不到回调。可以取时间戳
  * Created by QYG_XXY on 0004 2018/4/4.
  */
 
+@WeexModule(name = "jShareLib")
 public class JShareModule extends WXModule {
     /**
      * 文字分享标志
@@ -443,4 +449,311 @@ public class JShareModule extends WXModule {
             }
         }
     };
+
+
+    /**
+     * 停止推送服务。
+     * 调用了本 API 后，JPush 推送服务完全被停止。具体表现为：
+     * 收不到推送消息
+     * 极光推送所有的其他 API 调用都无效,不能通过 JPushInterface.init 恢复，需要调用resumePush恢复。
+     */
+    @JSMethod(uiThread = true)
+    public void stopPush() {
+        if (mWXSDKInstance == null) {
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            return;
+        }
+        JPushInterface.stopPush(context);
+    }
+
+    /**
+     * 恢复推送服务。
+     * 调用了此 API 后，极光推送完全恢复正常工作。
+     */
+    @JSMethod(uiThread = true)
+    public void resumePush() {
+        if (mWXSDKInstance == null) {
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            return;
+        }
+        JPushInterface.resumePush(context);
+    }
+
+    /**
+     * 用来检查 Push Service 是否已经被停止
+     * SDK 1.5.2 以上版本支持。
+     *
+     * @return
+     */
+    @JSMethod(uiThread = false)
+    public boolean isPushStopped() {
+        if (mWXSDKInstance == null) {
+            return false;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            return false;
+        }
+        return JPushInterface.isPushStopped(context);
+    }
+
+    /**
+     * 调用此 API 来设置别名。
+     * 需要理解的是，这个接口是覆盖逻辑，而不是增量逻辑。即新的调用会覆盖之前的设置。
+     * 支持的版本
+     * <p>
+     * 开始支持的版本：3.0.7
+     *
+     * @param sequence 用户自定义的操作序列号, 同操作结果一起返回，用来标识一次操作的唯一性。
+     * @param alias    每次调用设置有效的别名，覆盖之前的设置。
+     *                 有效的别名组成：字母（区分大小写）、数字、下划线、汉字、特殊字符@!#$&*+=.|。
+     *                 限制：alias 命名长度限制为 40 字节。（判断长度需采用UTF-8编码）
+     */
+    @JSMethod(uiThread = true)
+    public void setAlias(int sequence, String alias, JSCallback jsCallback) {
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - mWXSDKInstance is null!!!"));
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - Context is null!!!"));
+            return;
+        }
+        JPushCallBackManager.getInstance().putCallBack(sequence, jsCallback);
+        JPushInterface.setAlias(context, sequence, alias);
+    }
+
+
+    /**
+     * 调用此 API 来删除别名。
+     * 支持的版本
+     * <p>
+     * 开始支持的版本：3.0.7
+     *
+     * @param sequence 用户自定义的操作序列号, 同操作结果一起返回，用来标识一次操作的唯一性。
+     */
+    @JSMethod(uiThread = true)
+    public void deleteAlias(int sequence, JSCallback jsCallback) {
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - mWXSDKInstance is null!!!"));
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - Context is null!!!"));
+            return;
+        }
+        JPushCallBackManager.getInstance().putCallBack(sequence, jsCallback);
+        JPushInterface.deleteAlias(context, sequence);
+    }
+
+    /**
+     * 调用此 API 来查询别名。
+     * 支持的版本
+     * <p>
+     * 开始支持的版本：3.0.7
+     *
+     * @param sequence 用户自定义的操作序列号, 同操作结果一起返回，用来标识一次操作的唯一性。
+     */
+    @JSMethod(uiThread = true)
+    public void getAlias(int sequence, JSCallback jsCallback) {
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - mWXSDKInstance is null!!!"));
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - Context is null!!!"));
+            return;
+        }
+        JPushCallBackManager.getInstance().putCallBack(sequence, jsCallback);
+        JPushInterface.getAlias(context, sequence);
+    }
+
+
+    /**
+     * 调用此 API 来设置标签。
+     * 需要理解的是，这个接口是覆盖逻辑，而不是增量逻辑。即新的调用会覆盖之前的设置。
+     * 支持的版本
+     * <p>
+     * 开始支持的版本：3.0.7
+     *
+     * @param sequence 用户自定义的操作序列号, 同操作结果一起返回，用来标识一次操作的唯一性
+     * @param tags     限制：每个 tag 命名长度限制为 40 字节，最多支持设置 1000 个 tag，且单次操作总长度不得超过5000字节。（判断长度需采用UTF-8编码）
+     *                 单个设备最多支持设置 1000 个 tag。App 全局 tag 数量无限制。
+     */
+    @JSMethod(uiThread = true)
+    public void setTags(int sequence, Set<String> tags, JSCallback jsCallback) {
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - mWXSDKInstance is null!!!"));
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - Context is null!!!"));
+            return;
+        }
+        JPushCallBackManager.getInstance().putCallBack(sequence, jsCallback);
+        JPushInterface.setTags(context, sequence, tags);
+    }
+
+
+    /**
+     * 调用此 API 来新增标签。
+     * 支持的版本
+     * <p>
+     * 开始支持的版本：3.0.7
+     *
+     * @param sequence 用户自定义的操作序列号, 同操作结果一起返回，用来标识一次操作的唯一性。
+     * @param tags     每次调用至少新增一个 tag。
+     *                 有效的标签组成：字母（区分大小写）、数字、下划线、汉字、特殊字符@!#$&*+=.|。
+     *                 限制：每个 tag 命名长度限制为 40 字节，最多支持设置 1000 个 tag，且单次操作总长度不得超过5000字节。（判断长度需采用UTF-8编码）
+     *                 单个设备最多支持设置 1000 个 tag。App 全局 tag 数量无限制。
+     */
+    @JSMethod(uiThread = true)
+    public void addTags(int sequence, Set<String> tags, JSCallback jsCallback) {
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - mWXSDKInstance is null!!!"));
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - Context is null!!!"));
+            return;
+        }
+        JPushCallBackManager.getInstance().putCallBack(sequence, jsCallback);
+        JPushInterface.addTags(context, sequence, tags);
+    }
+
+
+    /**
+     * 调用此 API 来删除指定标签。
+     * 支持的版本
+     * <p>
+     * 开始支持的版本：3.0.7
+     *
+     * @param sequence 用户自定义的操作序列号, 同操作结果一起返回，用来标识一次操作的唯一性。
+     * @param tags     每次调用至少删除一个 tag。
+     *                 有效的标签组成：字母（区分大小写）、数字、下划线、汉字、特殊字符@!#$&*+=.|。
+     *                 限制：每个 tag 命名长度限制为 40 字节，最多支持设置 1000 个 tag，且单次操作总长度不得超过5000字节。（判断长度需采用UTF-8编码）
+     *                 单个设备最多支持设置 1000 个 tag。App 全局 tag 数量无限制。
+     */
+    @JSMethod(uiThread = true)
+    public void deleteTags(int sequence, Set<String> tags, JSCallback jsCallback) {
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - mWXSDKInstance is null!!!"));
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - Context is null!!!"));
+            return;
+        }
+        JPushCallBackManager.getInstance().putCallBack(sequence, jsCallback);
+        JPushInterface.deleteTags(context, sequence, tags);
+    }
+
+    /**
+     * 调用此 API 来清除所有标签。
+     * 支持的版本
+     * <p>
+     * 开始支持的版本：3.0.7
+     *
+     * @param sequence 用户自定义的操作序列号, 同操作结果一起返回，用来标识一次操作的唯一性。
+     */
+    @JSMethod(uiThread = true)
+    public void cleanTags(int sequence, JSCallback jsCallback) {
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - mWXSDKInstance is null!!!"));
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - Context is null!!!"));
+            return;
+        }
+        JPushCallBackManager.getInstance().putCallBack(sequence, jsCallback);
+        JPushInterface.cleanTags(context, sequence);
+    }
+
+
+    /**
+     * 调用此 API 来查询所有标签。
+     * 支持的版本
+     * <p>
+     * 开始支持的版本：3.0.7
+     *
+     * @param sequence 用户自定义的操作序列号, 同操作结果一起返回，用来标识一次操作的唯一性。
+     */
+    @JSMethod(uiThread = true)
+    public void getAllTags(int sequence, JSCallback jsCallback) {
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - mWXSDKInstance is null!!!"));
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - Context is null!!!"));
+            return;
+        }
+        JPushCallBackManager.getInstance().putCallBack(sequence, jsCallback);
+        JPushInterface.getAllTags(context, sequence);
+    }
+
+
+    /**
+     * 调用此 API 来查询指定tag与当前用户绑定的状态。
+     * 支持的版本
+     * <p>
+     * 开始支持的版本：3.0.7
+     *
+     * @param sequence 用户自定义的操作序列号, 同操作结果一起返回，用来标识一次操作的唯一性。
+     * @param tag      tag
+     */
+    @JSMethod(uiThread = true)
+    public void checkTagBindState(int sequence, String tag, JSCallback jsCallback) {
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - mWXSDKInstance is null!!!"));
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - Context is null!!!"));
+            return;
+        }
+        JPushCallBackManager.getInstance().putCallBack(sequence, jsCallback);
+        JPushInterface.checkTagBindState(context, sequence, tag);
+    }
+
+    /**
+     * 调用此API设置手机号码。该接口会控制调用频率，频率为 10s之内最多三次。 用于短信补充功能。
+     * 支持的版本
+     * <p>
+     * 开始支持的版本：3.1.1
+     *
+     * @param sequence     用户自定义的操作序列号, 同操作结果一起返回，用来标识一次操作的唯一性。
+     * @param mobileNumber 电话号码 手机号码。如果传null或空串则为解除号码绑定操作。
+     *                     限制：只能以 “+” 或者 数字开头；后面的内容只能包含 “-” 和 数字。
+     */
+    @JSMethod(uiThread = true)
+    public void setMobileNumber(int sequence, String mobileNumber, JSCallback jsCallback) {
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - mWXSDKInstance is null!!!"));
+            return;
+        }
+        Context context = mWXSDKInstance.getContext();
+        if (mWXSDKInstance == null) {
+            jsCallback.invoke(new BaseCallBackBean<String>().setCode(-200).setMessage("UserModule ::: getInstall - Context is null!!!"));
+            return;
+        }
+        JPushCallBackManager.getInstance().putCallBack(sequence, jsCallback);
+        JPushInterface.setMobileNumber(context, sequence, mobileNumber);
+    }
 }
