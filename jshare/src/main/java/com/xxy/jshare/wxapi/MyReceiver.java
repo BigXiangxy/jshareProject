@@ -89,7 +89,7 @@ public class MyReceiver extends BroadcastReceiver {
                 String fileHtml = bundle.getString(JPushInterface.EXTRA_RICHPUSH_HTML_PATH);//富媒体通知推送下载的HTML的文件路径,用于展现WebView。
                 String fileStr = bundle.getString(JPushInterface.EXTRA_RICHPUSH_HTML_RES);
                 
-				String[] fileNames =fileStr!=null?null: fileStr.split(",");//富媒体通知推送下载的图片资源的文件名,多个文件名用 “，” 分开。 与 “JPushInterface.EXTRA_RICHPUSH_HTML_PATH” 位于同一个路径。
+				String[] fileNames =fileStr==null?null: fileStr.split(",");//富媒体通知推送下载的图片资源的文件名,多个文件名用 “，” 分开。 与 “JPushInterface.EXTRA_RICHPUSH_HTML_PATH” 位于同一个路径。
                 String file = bundle.getString(JPushInterface.EXTRA_MSG_ID);//唯一标识通知消息的 ID, 可用于上报统计等。
                 String bigText = bundle.getString(JPushInterface.EXTRA_BIG_TEXT);//大文本通知样式中大文本的内容。
                 String bigPicPath = bundle.getString(JPushInterface.EXTRA_BIG_PIC_PATH);//可支持本地图片的路径，或者填网络图片地址。大图片通知样式中大图片的路径/地址。
