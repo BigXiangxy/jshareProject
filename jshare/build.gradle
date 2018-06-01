@@ -52,7 +52,7 @@ dependencies {
     compile "com.android.support:appcompat-v7:26.1.0"
     testCompile 'junit:junit:4.12'
     androidTestCompile('com.android.support.test.espresso:espresso-core:3.0.1')
-    compile 'com.github.BigXiangxy:QYQBase:1.6'
+    compile 'com.github.BigXiangxy:QYQBase:1.7'
     provided 'org.weex.plugin:processor:1.0.2'
 //    if (project.usingWeex == "0.18.0") {
 //        compile project(':weex_sdk')
