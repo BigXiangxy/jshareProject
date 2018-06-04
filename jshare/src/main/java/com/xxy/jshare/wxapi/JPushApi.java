@@ -11,14 +11,16 @@ import cn.jpush.android.api.JPushInterface;
  */
 
 public final class JPushApi {
+    public static String APPLICATION_ID = null;
 
     /**
      * 初始化
      *
      * @param context
      */
-    public static void init(Context context) {
+    public static void init(Context context, String packageName) {
         JPushInterface.init(context);
+        APPLICATION_ID = packageName;
     }
 
     /**

@@ -1,10 +1,12 @@
 package com.xxy.jshare.wxapi;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.base.library.LogX;
 import com.base.library.MyWeexManager;
@@ -13,8 +15,10 @@ import com.taobao.weex.WXSDKInstance;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import cn.jiguang.share.android.utils.Logger;
@@ -30,6 +34,7 @@ import cn.jpush.android.api.JPushInterface;
 public class MyReceiver extends BroadcastReceiver {
     private static final String TAG = "MyReceiver";
     private static final String NEW_PUSH_KEY = "newJGuangPush";
+    public static final String PUSH_INTENT_KEY = "push_intent_key";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -88,8 +93,8 @@ public class MyReceiver extends BroadcastReceiver {
                 String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);//保存服务器推送下来的附加字段。这是个 JSON 字符串。
                 String fileHtml = bundle.getString(JPushInterface.EXTRA_RICHPUSH_HTML_PATH);//富媒体通知推送下载的HTML的文件路径,用于展现WebView。
                 String fileStr = bundle.getString(JPushInterface.EXTRA_RICHPUSH_HTML_RES);
-                
-				String[] fileNames =fileStr==null?null: fileStr.split(",");//富媒体通知推送下载的图片资源的文件名,多个文件名用 “，” 分开。 与 “JPushInterface.EXTRA_RICHPUSH_HTML_PATH” 位于同一个路径。
+
+                String[] fileNames = fileStr == null ? null : fileStr.split(",");//富媒体通知推送下载的图片资源的文件名,多个文件名用 “，” 分开。 与 “JPushInterface.EXTRA_RICHPUSH_HTML_PATH” 位于同一个路径。
                 String file = bundle.getString(JPushInterface.EXTRA_MSG_ID);//唯一标识通知消息的 ID, 可用于上报统计等。
                 String bigText = bundle.getString(JPushInterface.EXTRA_BIG_TEXT);//大文本通知样式中大文本的内容。
                 String bigPicPath = bundle.getString(JPushInterface.EXTRA_BIG_PIC_PATH);//可支持本地图片的路径，或者填网络图片地址。大图片通知样式中大图片的路径/地址。
@@ -115,12 +120,6 @@ public class MyReceiver extends BroadcastReceiver {
                 sendMsg(map);
             } else if (JPushInterface.ACTION_NOTIFICATION_OPENED.equals(intent.getAction())) {
                 Logger.d(TAG, "[MyReceiver] 用户点击打开了通知");
-                //打开自定义的Activity
-                Intent i = new Intent("com.qyq.weex.app.main");
-                i.putExtras(bundle);
-                //i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                context.startActivity(i);
                 String title = bundle.getString(JPushInterface.EXTRA_NOTIFICATION_TITLE);//对应 Portal 推送通知界面上的“通知标题”字段。对应 API 通知内容的 title 字段。
                 String content = bundle.getString(JPushInterface.EXTRA_ALERT);//对应 Portal 推送通知界面上的“通知内容”字段。对应 API 通知内容的alert字段
                 String type = bundle.getString(JPushInterface.EXTRA_EXTRA);//对应 Portal 推送消息界面上的“可选设置”里的附加字段。
@@ -135,6 +134,7 @@ public class MyReceiver extends BroadcastReceiver {
                 map.put("notificationId", notificationId);
                 map.put("msgId", file);
                 sendMsg(map);
+                startActivity(context, map);
             } else if (JPushInterface.ACTION_RICHPUSH_CALLBACK.equals(intent.getAction())) {
                 Logger.d(TAG, "[MyReceiver] 用户收到到RICH PUSH CALLBACK: " + bundle.getString(JPushInterface.EXTRA_EXTRA));
                 //在这里根据 JPushInterface.EXTRA_EXTRA 的内容处理代码，比如打开新的Activity， 打开一个网页等..
@@ -199,6 +199,53 @@ public class MyReceiver extends BroadcastReceiver {
                 instance.fireGlobalEventCallback(NEW_PUSH_KEY, params);
             }
         }
+    }
+
+    private void startActivity(Context context, Map<String, Object> params) {
+        if (TextUtils.isEmpty(JPushApi.APPLICATION_ID)) return;
+        //判断app进程是否存活
+        if (isAppAlive(context, JPushApi.APPLICATION_ID)) {
+            //如果存活的话，就直接启动DetailActivity，但要考虑一种情况，就是app的进程虽然仍然在
+            //但Task栈已经空了，比如用户点击Back键退出应用，但进程还没有被系统回收，如果直接启动
+            //DetailActivity,再按Back键就不会返回MainActivity了。所以在启动
+            //DetailActivity前，要先启动MainActivity。
+            Intent mainIntent = new Intent(JPushApi.APPLICATION_ID + ".main");
+            //将MainAtivity的launchMode设置成SingleTask, 或者在下面flag中加上Intent.FLAG_CLEAR_TOP,
+            //如果Task栈中有MainActivity的实例，就会把它移到栈顶，把在它之上的Activity都清理出栈，
+            //如果Task栈不存在MainActivity实例，则在栈顶创建
+            mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            Intent detailIntent = new Intent(context, DetailActivity.class);
+//            detailIntent.putExtra("name", "电饭锅");
+//            detailIntent.putExtra("price", "58元");
+//            detailIntent.putExtra("detail", "这是一个好锅, 这是app进程存在，直接启动Activity的");
+//            Intent[] intents = {mainIntent, detailIntent};
+//            mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mainIntent.putExtra(PUSH_INTENT_KEY, (Serializable) params);
+            context.startActivity(mainIntent);
+        } else {
+            //如果app进程已经被杀死，先重新启动app，将DetailActivity的启动参数传入Intent中，参数经过
+            //SplashActivity传入MainActivity，此时app的初始化已经完成，在MainActivity中就可以根据传入             //参数跳转到DetailActivity中去了
+            Log.i(TAG, "the app process is dead");
+            Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(JPushApi.APPLICATION_ID);
+            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            launchIntent.putExtra(PUSH_INTENT_KEY, (Serializable) params);
+            context.startActivity(launchIntent);
+        }
+    }
+
+
+    public static boolean isAppAlive(Context context, String packageName) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (activityManager == null) return false;
+        List<ActivityManager.RunningAppProcessInfo> processInfos = activityManager.getRunningAppProcesses();
+        for (int i = 0; i < processInfos.size(); i++) {
+            if (processInfos.get(i).processName.equals(packageName)) {
+                Log.i(TAG, String.format("the %s is running, isAppAlive return true", packageName));
+                return true;
+            }
+        }
+        Log.i(TAG, String.format("the %s is not running, isAppAlive return false", packageName));
+        return false;
     }
 
 //    /**
