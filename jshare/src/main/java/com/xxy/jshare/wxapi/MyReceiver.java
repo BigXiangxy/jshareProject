@@ -10,10 +10,11 @@ import android.util.Log;
 
 import com.base.library.LogX;
 import com.base.library.MyWeexManager;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.taobao.weex.WXSDKInstance;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -68,21 +69,20 @@ public class MyReceiver extends BroadcastReceiver {
                 //对应 API 消息内容的 extras 字段。
                 //对应 Portal 推送消息界面上的“可选设置”里的附加字段。
                 Map<String, Object> map = new HashMap<>();
-                JSONObject extraJson = null;
-                if (!ExampleUtil.isEmpty(extras)) {
+                if (!TextUtils.isEmpty(extras)) {
                     try {
-                        extraJson = new JSONObject(extras);
-                        if (extraJson.length() > 0) {
-
-                        }
-                    } catch (JSONException e) {
+                        Map<String, Object> jsonObject = new Gson().fromJson(extras, new TypeToken<Map<String, Object>>() {
+                        }.getType());
+                        map.put("extras", jsonObject); //保存服务器推送下来的附加字段。这是个 JSON 字符串。
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        map.put("extras", extras); //保存服务器推送下来的附加字段。这是个 JSON 字符串。
                     }
                 }
                 map.put("action", "messageReceived");
                 map.put("msgId", msgId);
                 map.put("title", title);
                 map.put("message", message);
-                map.put("extras", extraJson);
                 sendMsg(map);
             } else if (JPushInterface.ACTION_NOTIFICATION_RECEIVED.equals(intent.getAction())) {
                 Logger.d(TAG, "[MyReceiver] 接收到推送下来的通知");
@@ -107,7 +107,16 @@ public class MyReceiver extends BroadcastReceiver {
                 map.put("notifactionId", notifactionId); //通知栏的Notification ID，可以用于清除Notification
                 map.put("title", title); //对应 API 通知内容的 title 字段。
                 map.put("content", content); //保存服务器推送下来的通知内容。
-                map.put("extras", extras); //保存服务器推送下来的附加字段。这是个 JSON 字符串。
+                if (!TextUtils.isEmpty(extras)) {
+                    try {
+                        Map<String, Object> jsonObject = new Gson().fromJson(extras, new TypeToken<Map<String, Object>>() {
+                        }.getType());
+                        map.put("extras", jsonObject); //保存服务器推送下来的附加字段。这是个 JSON 字符串。
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        map.put("extras", extras); //保存服务器推送下来的附加字段。这是个 JSON 字符串。
+                    }
+                }
                 map.put("fileHtml", fileHtml); //富媒体通知推送下载的HTML的文件路径,用于展现WebView。
                 map.put("imgStr", fileStr);
                 map.put("imgs", fileNames);
@@ -122,7 +131,7 @@ public class MyReceiver extends BroadcastReceiver {
                 Logger.d(TAG, "[MyReceiver] 用户点击打开了通知");
                 String title = bundle.getString(JPushInterface.EXTRA_NOTIFICATION_TITLE);//对应 Portal 推送通知界面上的“通知标题”字段。对应 API 通知内容的 title 字段。
                 String content = bundle.getString(JPushInterface.EXTRA_ALERT);//对应 Portal 推送通知界面上的“通知内容”字段。对应 API 通知内容的alert字段
-                String type = bundle.getString(JPushInterface.EXTRA_EXTRA);//对应 Portal 推送消息界面上的“可选设置”里的附加字段。
+                String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);//对应 Portal 推送消息界面上的“可选设置”里的附加字段。
                 int notificationId = bundle.getInt(JPushInterface.EXTRA_NOTIFICATION_ID);//通知栏的Notification ID，可以用于清除Notification
                 String file = bundle.getString(JPushInterface.EXTRA_MSG_ID);//唯一标识调整消息的 ID, 可用于上报统计等。
 
@@ -130,7 +139,16 @@ public class MyReceiver extends BroadcastReceiver {
                 map.put("action", "notificationOpened");
                 map.put("title", title);
                 map.put("content", content);
-                map.put("extra", type);
+                if (!TextUtils.isEmpty(extras)) {
+                    try {
+                        Map<String, Object> jsonObject = new Gson().fromJson(extras, new TypeToken<Map<String, Object>>() {
+                        }.getType());
+                        map.put("extras", jsonObject); //保存服务器推送下来的附加字段。这是个 JSON 字符串。
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        map.put("extras", extras); //保存服务器推送下来的附加字段。这是个 JSON 字符串。
+                    }
+                }
                 map.put("notificationId", notificationId);
                 map.put("msgId", file);
                 sendMsg(map);
@@ -170,13 +188,12 @@ public class MyReceiver extends BroadcastReceiver {
                 }
 
                 try {
-                    JSONObject json = new JSONObject(bundle.getString(JPushInterface.EXTRA_EXTRA));
+                    org.json.JSONObject json = new org.json.JSONObject(bundle.getString(JPushInterface.EXTRA_EXTRA));
                     Iterator<String> it = json.keys();
 
                     while (it.hasNext()) {
                         String myKey = it.next();
-                        sb.append("\nkey:" + key + ", value: [" +
-                                myKey + " - " + json.optString(myKey) + "]");
+                        sb.append("\nkey:" + key + ", value: [" + myKey + " - " + json.optString(myKey) + "]");
                     }
                 } catch (JSONException e) {
                     Logger.e(TAG, "Get message extra JSON error!");
