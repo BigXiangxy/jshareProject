@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.base.library.LogX;
 import com.base.library.MyWeexManager;
+import com.base.library.SharedPreferencesHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.taobao.weex.WXSDKInstance;
@@ -36,6 +37,7 @@ public class MyReceiver extends BroadcastReceiver {
     private static final String TAG = "MyReceiver";
     private static final String NEW_PUSH_KEY = "newJGuangPush";
     public static final String PUSH_INTENT_KEY = "push_intent_key";
+    private static final String spF = "DSPNAME";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -44,12 +46,14 @@ public class MyReceiver extends BroadcastReceiver {
             LogX.e(TAG, "[MyReceiver] Action： " + intent.getAction() + "\nextras:\n" + printBundle(bundle));
 
             if (JPushInterface.ACTION_REGISTRATION_ID.equals(intent.getAction())) {//设备识别号监听，可以保存到服务器用于点对点推送
-                String regId = bundle.getString(JPushInterface.EXTRA_REGISTRATION_ID);
+                String regId = bundle == null ? null : bundle.getString(JPushInterface.EXTRA_REGISTRATION_ID);
                 Logger.d(TAG, "[MyReceiver] 接收Registration Id : " + regId);
                 //send the Registration Id to your server...
                 Map<String, Object> map = new HashMap<>();
                 map.put("regId", regId);
                 map.put("action", "registrationID");
+                SharedPreferencesHelper preferencesHelper = new SharedPreferencesHelper(context, spF);
+                preferencesHelper.put("regId", TextUtils.isEmpty(regId) ? "" : regId);
                 sendMsg(map);
             } else if (JPushInterface.ACTION_MESSAGE_RECEIVED.equals(intent.getAction())) {
                 Logger.d(TAG, "[MyReceiver] 接收到推送下来的自定义消息: " + bundle.getString(JPushInterface.EXTRA_MESSAGE));

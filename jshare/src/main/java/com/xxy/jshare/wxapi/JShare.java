@@ -183,27 +183,29 @@ public class JShare {
             mGrayIcon = "jiguang_socialize_wxfavorite";
             mShowWord = "jiguang_socialize_text_weixin_favorite_key";
             mFlag = TEXT_FLAG | IMG_LOC_FLAG | WEBPAGE_FLAG | MUSIC_FLAG | VIDEO_FLAG;
-        } else if (SinaWeibo.Name.equals(platformName)) {
-            mIcon = "jiguang_socialize_sina";
-            mGrayIcon = "jiguang_socialize_sina";
-            mShowWord = "jiguang_socialize_text_sina_key";
-            mFlag = TEXT_FLAG | IMG_LOC_FLAG | WEBPAGE_FLAG | MUSIC_FLAG | VIDEO_FLAG;
-        } else if (SinaWeiboMessage.Name.equals(platformName)) {
-            mIcon = "jiguang_socialize_sina";
-            mGrayIcon = "jiguang_socialize_sina";
-            mShowWord = "jiguang_socialize_text_sina_msg_key";
-            mFlag = WEBPAGE_FLAG;
-        } else if (QQ.Name.equals(platformName)) {
-            mIcon = "jiguang_socialize_qq";
-            mGrayIcon = "jiguang_socialize_qq";
-            mShowWord = "jiguang_socialize_text_qq_key";
-            mFlag = IMG_LOC_FLAG | WEBPAGE_FLAG | MUSIC_FLAG | VIDEO_FLAG;
-        } else if (QZone.Name.equals(platformName)) {
-            mIcon = "jiguang_socialize_qzone";
-            mGrayIcon = "jiguang_socialize_qzone";
-            mShowWord = "jiguang_socialize_text_qq_zone_key";
-            mFlag = TEXT_FLAG | IMG_LOC_FLAG | IMG_URL_FLAG | WEBPAGE_FLAG | MUSIC_FLAG | VIDEO_FLAG;
         }
+//        else if (SinaWeibo.Name.equals(platformName)) {
+//            mIcon = "jiguang_socialize_sina";
+//            mGrayIcon = "jiguang_socialize_sina";
+//            mShowWord = "jiguang_socialize_text_sina_key";
+//            mFlag = TEXT_FLAG | IMG_LOC_FLAG | WEBPAGE_FLAG | MUSIC_FLAG | VIDEO_FLAG;
+//        } else if (SinaWeiboMessage.Name.equals(platformName)) {
+//            mIcon = "jiguang_socialize_sina";
+//            mGrayIcon = "jiguang_socialize_sina";
+//            mShowWord = "jiguang_socialize_text_sina_msg_key";
+//            mFlag = WEBPAGE_FLAG;
+//        } else if (QQ.Name.equals(platformName)) {
+//            mIcon = "jiguang_socialize_qq";
+//            mGrayIcon = "jiguang_socialize_qq";
+//            mShowWord = "jiguang_socialize_text_qq_key";
+//            mFlag = IMG_LOC_FLAG | WEBPAGE_FLAG | MUSIC_FLAG | VIDEO_FLAG;
+//        } else if (QZone.Name.equals(platformName)) {
+//            mIcon = "jiguang_socialize_qzone";
+//            mGrayIcon = "jiguang_socialize_qzone";
+//            mShowWord = "jiguang_socialize_text_qq_zone_key";
+//            mFlag = TEXT_FLAG | IMG_LOC_FLAG | IMG_URL_FLAG | WEBPAGE_FLAG | MUSIC_FLAG | VIDEO_FLAG;
+//        }
+
 //        else if (Facebook.Name.equals(platformName)) {
 //            mIcon = "jiguang_socialize_facebook";
 //            mGrayIcon = "jiguang_socialize_facebook";
